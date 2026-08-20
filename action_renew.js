@@ -666,14 +666,14 @@ async function solveAltchaIfPresent(page, stageName = "Renew阶段", maxAttempts
             }
 
             // --- 登录逻辑 (简略版，逻辑一致) ---
-            if (page.url().includes('dashboard')) {
+            if (new URL(page.url()).pathname.includes('dashboard')) {
                 await page.goto('https://dashboard.katabump.com/auth/logout');
                 await page.waitForTimeout(2000);
             }
             // 总是先去登录页
             await page.goto('https://dashboard.katabump.com/auth/login');
             await page.waitForTimeout(2000);
-            if (page.url().includes('dashboard')) {
+            if (new URL(page.url()).pathname.includes('dashboard')) {
                 // 如果登出没成功，再次登出
                 await page.goto('https://dashboard.katabump.com/auth/logout');
                 await page.waitForTimeout(2000);
@@ -695,7 +695,7 @@ async function solveAltchaIfPresent(page, stageName = "Renew阶段", maxAttempts
                 for (let findAttempt = 0; findAttempt < 15; findAttempt++) {
                     cdpClickResult = await attemptTurnstileCdp(page);
                     if (cdpClickResult) break;
-                    await page.waitForTimeout(1000);
+                    await page.waitForTimeout(3000);
                 }
 
                 if (cdpClickResult) {
