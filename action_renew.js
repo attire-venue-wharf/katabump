@@ -788,7 +788,7 @@ async function solveAltchaIfPresent(page, stageName = "Renew阶段", maxAttempts
                         const box = await modal.boundingBox();
                         if (box) await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 5 });
                     } catch (e) { }
-
+/*
                     // B. 找 Turnstile (小重试)
                     console.log('正在检查 Turnstile (使用 CDP 绕过)...');
                     let cdpClickResult = false;
@@ -834,7 +834,7 @@ async function solveAltchaIfPresent(page, stageName = "Renew阶段", maxAttempts
                         }
                         continue;
                     }
-
+*/
                     // E. 准备点击确认
                     const confirmBtn = modal.getByRole('button', { name: 'Renew' });
                     if (await confirmBtn.isVisible()) {
