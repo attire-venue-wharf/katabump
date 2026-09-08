@@ -706,10 +706,12 @@ async function solveAltchaIfPresent(page, stageName = "Renew阶段", maxAttempts
                         for (const f of frames) {
                             if (f.url().includes('cloudflare')) {
                                 try {
-                                    if (await f.getByText('Success!', { exact: false }).isVisible({ timeout: 500 })) {
+                                  //  if (await f.getByText('Success!', { exact: false }).isVisible({ timeout: 500 })) {
+                                    const locator = f.locator('text=Success!');
+                                     await locator.waitFor({ state: 'visible', timeout: 500 });
                                         isSuccess = true;
                                         break;
-                                    }
+                                  //  }
                                 } catch (e) { }
                             }
                         }
