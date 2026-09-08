@@ -699,45 +699,44 @@ async function solveAltchaIfPresent(page, stageName = "Renew阶段", maxAttempts
                 }
 
                 if (cdpClickResult) {
-    console.log('   >> 登录 CDP 点击生效。正在等待 Cloudflare Turnstile 验证...');
-    
-    try {
-        // 1. 等待包含 'cloudflare' 的 iframe 出现
-        // 注意：Turnstile iframe 的 src 通常包含 challenges.cloudflare.com
-        const cfFrame = await page.waitForSelector('iframe[src*="challenges.cloudflare.com"]', { 
-            state: 'attached', 
-            timeout: 15000 // 给一点时间让 iframe 加载
-        }).then(() => page.frameLocator('iframe[src*="challenges.cloudflare.com"]'));
+    console.log('>> CDP Click active for login. Waiting up to 30s for Cloudflare response...');
 
-        if (!cfFrame) {
-            throw new Error('未找到 Cloudflare iframe');
+    let isSuccess = false;
+
+    for (let waitSec = 0; waitSec < 30; waitSec++) {
+        try {
+            const el = page.locator('input[name="cf-turnstile-response"]');
+
+            const count = await el.count();
+
+            if (count > 0) {
+                const value = await el.first().inputValue();
+
+                console.log(
+                    `   [${waitSec + 1}/30] exists=${true}, valueLength=${value.length}`
+                );
+
+                if (value.length > 0) {
+                    isSuccess = true;
+                    break;
+                }
+            } else {
+                console.log(
+                    `   [${waitSec + 1}/30] exists=false`
+                );
+            }
+        } catch (e) {
+            console.log(`   [${waitSec + 1}/30] error: ${e.message}`);
         }
 
-        // 2. 等待 iframe 内出现成功标志
-        // 注意：不同版本的 Turnstile UI 可能不同，有的显示 "Success!", 有的直接消失
-        // 这里假设成功时会显示 "Success!" 文本
-        await cfFrame.locator('text=Success!').waitFor({ 
-            state: 'visible', 
-            timeout: 60000 // 最多等待 60 秒
-        });
-
-        console.log('   >> 登录前 Turnstile 验证成功。');
-        
-    } catch (error) {
-        // 如果是因为超时或没找到元素，可能是验证方式不同（例如无感验证）
-        // 或者验证已经自动完成且没有显示 "Success!" 文本
-        console.warn('   >> 未检测到显式的 "Success!" 文本，可能为无感验证或已超时。错误:', error.message);
-        
-        // 可选：额外检查 iframe 是否已消失（某些模式验证成功后 iframe 会移除）
-        const isFrameGone = await page.locator('iframe[src*="challenges.cloudflare.com"]').count() === 0;
-        if (isFrameGone) {
-             console.log('   >> Cloudflare iframe 已消失，视为验证通过。');
-        } else {
-             console.log('   >> 继续操作...');
-        }
+        await page.waitForTimeout(1000);
     }
-} else {
-    console.log('   >> 登录前未检测到或未点击 Turnstile，继续操作...');
+
+    if (isSuccess) {
+        console.log('>> Turnstile response detected.');
+    } else {
+        console.log('>> Timeout: no Turnstile response detected after 30s.');
+    }
 }
                 // --------------------------------------------
 
