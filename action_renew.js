@@ -937,6 +937,31 @@ async function solveAltchaIfPresent(page, stageName = "Renew阶段", maxAttempts
 
                             await sendTelegramMessage(`✅ *续期成功*\n用户: ${user.username}\n状态: 服务器已成功续期！`, successShotPath);
                             renewSuccess = true;
+                            const notTimeLoc = page.getByText("You can't renew your server yet");
+                                if (await notTimeLoc.isVisible()) {
+                                    const text = await notTimeLoc.innerText();
+                                    const match = text.match(/as of\s+(.*?)\s+\(/);
+                                    let dateStr = match ? match[1] : 'Unknown Date';
+                                    console.log(`   >> ⏳ 暂无法续期。下次可用时间: ${dateStr}`);
+
+                                    // 截图证明
+                                    const fs = require('fs');
+                                    const path = require('path');
+                                    const photoDir = path.join(process.cwd(), 'screenshots');
+                                    if (!fs.existsSync(photoDir)) fs.mkdirSync(photoDir, { recursive: true });
+                                    const safeUser = user.username.replace(/[^a-z0-9]/gi, '_');
+                                    const skipShotPath = path.join(photoDir, `${safeUser}_skip.png`);
+                                    try { await page.screenshot({ path: skipShotPath, fullPage: true }); } catch (e) { }
+
+                                    await sendTelegramMessage(`⏳ *暂无法续期 (跳过)*\n用户: ${user.username}\n原因: 还没到时间\n下次可用: ${dateStr}`, skipShotPath);
+
+                                    renewSuccess = true; // Mark as done to stop retries
+                                    try {
+                                        const closeBtn = modal.getByLabel('Close');
+                                        if (await closeBtn.isVisible()) await closeBtn.click();
+                                    } catch (e) { }
+                                    break;
+                                }
                             break;
                         } else {
                             console.log('   >> 模态框仍打开但无错误？重试循环...');
