@@ -741,8 +741,7 @@ do{
         console.log('>> Timeout: no Turnstile response detected after 30s.');
     }
 }
-                attempts++;
-            }while(!isSuccess && attempts < maxAttempts);
+               
                 // --------------------------------------------
 
                 await page.getByRole('button', { name: 'Login', exact: true }).click();
@@ -775,9 +774,12 @@ do{
                 await page.getByRole('link', { name: 'See' }).first().click();
             } catch (e) {
                 console.log('未找到 "See" 按钮。');
+				if(attempts >= maxAttempts){
                 continue;
+				}
             }
-
+ attempts++;
+            }while(!isSuccess && attempts < maxAttempts);
             // --- Renew 逻辑 ---
             let renewSuccess = false;
             // 2. 一个扁平化的主循环：尝试 Renew 整个流程 (最多 20 次)
