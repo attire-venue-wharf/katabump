@@ -660,6 +660,7 @@ async function solveAltchaIfPresent(page, stageName = "Renew阶段", maxAttempts
 
         try {
             let attempts = 0;
+			let isSuccess = false;
 const maxAttempts = 5; // 设置最大重试次数，防止死循环
 do{
             if (page.isClosed()) {
@@ -704,7 +705,7 @@ do{
                 if (cdpClickResult) {
     console.log('>> CDP Click active for login. Waiting up to 30s for Cloudflare response...');
 
-    let isSuccess = false;
+    
 
     for (let waitSec = 0; waitSec < 30; waitSec++) {
         try {
