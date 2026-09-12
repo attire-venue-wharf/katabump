@@ -699,11 +699,11 @@ async function solveAltchaIfPresent(page, stageName = "Renew阶段", maxAttempts
                 }
 
                 if (cdpClickResult) {
-    console.log('>> CDP Click active for login. Waiting up to 30s for Cloudflare response...');
+    console.log('>> CDP Click active for login. Waiting up to 60s for Cloudflare response...');
 
     let isSuccess = false;
 
-    for (let waitSec = 0; waitSec < 30; waitSec++) {
+    for (let waitSec = 0; waitSec < 60; waitSec++) {
         try {
             const el = page.locator('input[name="cf-turnstile-response"]');
 
@@ -713,7 +713,7 @@ async function solveAltchaIfPresent(page, stageName = "Renew阶段", maxAttempts
                 const value = await el.first().inputValue();
 
                 console.log(
-                    `   [${waitSec + 1}/30] exists=${true}, valueLength=${value.length}`
+                    `   [${waitSec + 1}/60] exists=${true}, valueLength=${value.length}`
                 );
 
                 if (value.length > 0) {
@@ -722,11 +722,11 @@ async function solveAltchaIfPresent(page, stageName = "Renew阶段", maxAttempts
                 }
             } else {
                 console.log(
-                    `   [${waitSec + 1}/30] exists=false`
+                    `   [${waitSec + 1}/60] exists=false`
                 );
             }
         } catch (e) {
-            console.log(`   [${waitSec + 1}/30] error: ${e.message}`);
+            console.log(`   [${waitSec + 1}/60] error: ${e.message}`);
         }
 
         await page.waitForTimeout(1000);
@@ -735,7 +735,7 @@ async function solveAltchaIfPresent(page, stageName = "Renew阶段", maxAttempts
     if (isSuccess) {
         console.log('>> Turnstile response detected.');
     } else {
-        console.log('>> Timeout: no Turnstile response detected after 30s.');
+        console.log('>> Timeout: no Turnstile response detected after 60s.');
     }
 }
                 // --------------------------------------------
